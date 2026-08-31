@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+*.local
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.vite/
+*.tsbuildinfo
+.DS_Store
+screenshots/

@@ -1,0 +1,635 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   BOOM BOOM CHIPS — design system
+   One palette, one type scale, one motion vocabulary. Every screen is built
+   from the tokens and component classes below; nothing invents its own colour.
+   ========================================================================== */
+
+@theme {
+  /* --- surfaces: deep, cold, with a hint of blue so glow reads as light --- */
+  --color-void: #05060b;
+  --color-abyss: #0a0d18;
+  --color-surface: #121728;
+  --color-raised: #1a2036;
+  --color-line: #ffffff14;
+  --color-line-strong: #ffffff2b;
+
+  /* --- text --- */
+  --color-ink: #eef1ff;
+  --color-ink-dim: #a7aecb;
+  --color-ink-faint: #6e769a;
+
+  /* --- accents --- */
+  --color-cyan: #22d3ee;
+  --color-cyan-deep: #0e7490;
+  --color-violet: #8b5cf6;
+  --color-safe: #2ee6a8;
+  --color-safe-deep: #0f9b70;
+  --color-bomb: #ff3b5c;
+  --color-ember: #ff8a3d;
+  --color-gold: #ffd166;
+
+  --font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --shell-pad: max(0.75rem, env(safe-area-inset-left));
+    --tension: 0;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+    /* iOS Safari: 100vh lies when the toolbar is showing. */
+    min-height: 100dvh;
+  }
+
+  /* The app owns scrolling per-screen; the shell itself never scrolls. */
+  #root {
+    isolation: isolate;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    touch-action: manipulation;
+  }
+
+  /* Visible, on-brand focus for keyboard users only. */
+  :focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-cyan) 40%, transparent);
+  }
+}
+
+/* ==========================================================================
+   Layout shell
+   ========================================================================== */
+
+@utility screen-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 0.75rem) var(--shell-pad)
+    calc(env(safe-area-inset-bottom) + 0.75rem);
+}
+
+/* ==========================================================================
+   Glass panels and cards
+   ========================================================================== */
+
+@utility glass {
+  background: linear-gradient(160deg, #ffffff0f, #ffffff05);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow:
+    0 1px 0 0 #ffffff1a inset,
+    0 24px 60px -30px #000000cc;
+}
+
+/* Devices that cannot blur cheaply get an opaque panel instead of a slow one. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  }
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+@layer components {
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.95rem 1.5rem;
+    min-height: 3rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    background: linear-gradient(165deg, var(--color-raised), var(--color-surface));
+    color: var(--color-ink);
+    transition:
+      transform 140ms var(--ease-out-soft),
+      box-shadow 200ms var(--ease-out-soft),
+      border-color 200ms var(--ease-out-soft),
+      filter 200ms var(--ease-out-soft);
+    box-shadow:
+      0 1px 0 #ffffff1f inset,
+      0 10px 24px -14px #000;
+  }
+
+  /* Light sweeping across the face on hover: the "premium" tell. */
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, #ffffff26 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 620ms var(--ease-out-soft);
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: color-mix(in oklab, var(--color-cyan) 45%, var(--color-line-strong));
+    }
+    .btn:hover:not(:disabled)::after {
+      transform: translateX(120%);
+    }
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: saturate(0.4);
+  }
+
+  .btn-primary {
+    background: linear-gradient(150deg, var(--color-cyan), var(--color-cyan-deep) 65%, #0b4a5c);
+    border-color: color-mix(in oklab, var(--color-cyan) 60%, transparent);
+    color: #01131a;
+    box-shadow:
+      0 1px 0 #ffffff59 inset,
+      0 14px 34px -16px color-mix(in oklab, var(--color-cyan) 70%, transparent);
+  }
+
+  .btn-danger {
+    background: linear-gradient(150deg, var(--color-bomb), #a3122e);
+    border-color: color-mix(in oklab, var(--color-bomb) 55%, transparent);
+    color: #fff;
+    box-shadow:
+      0 1px 0 #ffffff4d inset,
+      0 14px 34px -16px color-mix(in oklab, var(--color-bomb) 70%, transparent);
+  }
+
+  .btn-ghost {
+    background: #ffffff08;
+    border-color: var(--color-line);
+    color: var(--color-ink-dim);
+  }
+
+  .btn-lg {
+    padding: 1.15rem 1.75rem;
+    min-height: 3.75rem;
+    font-size: 1.05rem;
+  }
+
+  .btn-sm {
+    padding: 0.6rem 1rem;
+    min-height: 2.5rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-md);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Labels and small type                                              */
+  /* ------------------------------------------------------------------ */
+
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: #ffffff0a;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .code-display {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 12vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    background: linear-gradient(180deg, #fff, var(--color-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 6px 24px color-mix(in oklab, var(--color-cyan) 45%, transparent));
+  }
+
+  .field {
+    width: 100%;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-line-strong);
+    background: #05070d99;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 8vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-align: center;
+    text-transform: uppercase;
+    transition:
+      border-color 200ms var(--ease-out-soft),
+      box-shadow 200ms var(--ease-out-soft);
+  }
+
+  .field::placeholder {
+    color: var(--color-ink-faint);
+    letter-spacing: 0.3em;
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--color-cyan);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-cyan) 22%, transparent);
+  }
+}
+
+/* ==========================================================================
+   THE CHIP
+   A layered poker chip: notched rim, domed inner disc, specular highlight.
+   Built entirely from gradients and shadows so it scales to any size and
+   animates on the GPU.
+   ========================================================================== */
+
+@layer components {
+  .chip {
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    perspective: 900px;
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .chip[data-interactive='true'] {
+    cursor: pointer;
+  }
+
+  /* Two nested transforms on purpose: the stylesheet owns lift and press,
+     the animation library owns the flip. They never write the same property. */
+  .chip__lift {
+    /* Both wrappers are spans, so they must be blockified or width and height
+       are ignored and every face collapses to nothing. */
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 180ms var(--ease-snap);
+  }
+
+  .chip__inner {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .chip__face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: grid;
+    place-items: center;
+    /* rim notches, dome light, and ground shadow, in one paint */
+    background:
+      radial-gradient(circle at 50% 26%, #ffffff26, transparent 52%),
+      radial-gradient(circle at 50% 118%, #000000a6, transparent 58%),
+      repeating-conic-gradient(
+        from 0deg,
+        var(--chip-rim-a) 0deg 11.25deg,
+        var(--chip-rim-b) 11.25deg 22.5deg
+      );
+    box-shadow:
+      0 1px 0 #ffffff33 inset,
+      0 -10px 20px -10px #000000b3 inset,
+      0 12px 26px -12px #000000e6,
+      0 2px 4px -2px #000000b3;
+  }
+
+  /* The inner disc, raised above the rim. */
+  .chip__face::before {
+    content: '';
+    position: absolute;
+    inset: 13%;
+    border-radius: 50%;
+    background: linear-gradient(165deg, var(--chip-top), var(--chip-bottom));
+    box-shadow:
+      0 1px 0 #ffffff40 inset,
+      0 -8px 16px -8px #000000a6 inset,
+      0 3px 8px -3px #00000099;
+  }
+
+  /* Specular sheen, offset so the chip reads as a physical object. */
+  .chip__face::after {
+    content: '';
+    position: absolute;
+    inset: 13%;
+    border-radius: 50%;
+    background: linear-gradient(150deg, #ffffff2e 0%, transparent 46%);
+    pointer-events: none;
+  }
+
+  .chip__mark {
+    position: relative;
+    z-index: 2;
+    width: 44%;
+    height: 44%;
+    display: grid;
+    place-items: center;
+    color: var(--chip-mark);
+    filter: drop-shadow(0 2px 3px #00000073);
+  }
+
+  .chip__face--back {
+    transform: rotateY(180deg);
+  }
+
+  /* --- palettes per state --- */
+
+  .chip[data-face='hidden'] .chip__face--front {
+    --chip-rim-a: #2b3352;
+    --chip-rim-b: #1b2138;
+    --chip-top: #232b47;
+    --chip-bottom: #141a2d;
+    --chip-mark: #7d88b5;
+  }
+
+  .chip[data-face='own'] .chip__face--front {
+    --chip-rim-a: #2f3a5e;
+    --chip-rim-b: #1d2440;
+    --chip-top: #27314f;
+    --chip-bottom: #161c31;
+    --chip-mark: #8e9ad0;
+  }
+
+  .chip[data-face='own-bomb'] .chip__face--front {
+    --chip-rim-a: #5a2438;
+    --chip-rim-b: #3a1626;
+    --chip-top: #4a1f31;
+    --chip-bottom: #2a1220;
+    --chip-mark: #ff8098;
+  }
+
+  .chip[data-face='armed'] .chip__face--front {
+    --chip-rim-a: #7a2a3f;
+    --chip-rim-b: #4d1a2a;
+    --chip-top: #96263f;
+    --chip-bottom: #5c1526;
+    --chip-mark: #ffd9e0;
+  }
+
+  .chip__face--safe {
+    --chip-rim-a: #1f6f57;
+    --chip-rim-b: #14503f;
+    --chip-top: #2ee6a8;
+    --chip-bottom: #0d7a58;
+    --chip-mark: #05261c;
+  }
+
+  .chip__face--bomb {
+    --chip-rim-a: #7d2030;
+    --chip-rim-b: #55141f;
+    --chip-top: #ff5a52;
+    --chip-bottom: #9c1027;
+    --chip-mark: #2b0308;
+  }
+
+  /* --- interaction --- */
+
+  @media (hover: hover) {
+    .chip[data-interactive='true']:hover .chip__lift {
+      transform: translateY(-6px) scale(1.04);
+    }
+    .chip[data-interactive='true']:hover .chip__face--front {
+      box-shadow:
+        0 1px 0 #ffffff4d inset,
+        0 -10px 20px -10px #000000b3 inset,
+        0 20px 34px -14px #000000e6,
+        0 0 0 2px color-mix(in oklab, var(--color-cyan) 55%, transparent),
+        0 0 34px -4px color-mix(in oklab, var(--color-cyan) 65%, transparent);
+    }
+  }
+
+  .chip[data-interactive='true']:active .chip__lift {
+    transform: translateY(-1px) scale(0.97);
+  }
+
+  .chip[data-selected='true'] .chip__face--front {
+    box-shadow:
+      0 1px 0 #ffffff4d inset,
+      0 0 0 2px var(--color-bomb),
+      0 0 30px -2px color-mix(in oklab, var(--color-bomb) 70%, transparent);
+  }
+
+  .chip[data-disabled='true'] {
+    filter: saturate(0.55) brightness(0.72);
+  }
+
+  /* Tension: the beat between committing to a chip and learning the answer.
+     Identical for a bomb and a safe chip — a longer pause before a bomb would
+     leak the answer through timing alone. */
+  .chip[data-tension='true'] .chip__lift {
+    animation: chip-tension 620ms var(--ease-in-out-soft) infinite;
+  }
+
+  .chip[data-tension='true'] .chip__face--front {
+    box-shadow:
+      0 1px 0 #ffffff4d inset,
+      0 0 0 2px var(--color-gold),
+      0 0 42px -2px color-mix(in oklab, var(--color-gold) 75%, transparent);
+  }
+}
+
+/* ==========================================================================
+   Motion vocabulary
+   ========================================================================== */
+
+@keyframes chip-tension {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  35% {
+    transform: scale(1.07) rotate(-1.6deg);
+  }
+  70% {
+    transform: scale(1.05) rotate(1.6deg);
+  }
+}
+
+@keyframes shell-shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  15% {
+    transform: translate3d(-8px, 4px, 0) rotate(-0.5deg);
+  }
+  30% {
+    transform: translate3d(7px, -5px, 0) rotate(0.5deg);
+  }
+  45% {
+    transform: translate3d(-5px, -3px, 0);
+  }
+  60% {
+    transform: translate3d(4px, 3px, 0);
+  }
+  80% {
+    transform: translate3d(-2px, 1px, 0);
+  }
+}
+
+@keyframes soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes sweep-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  .shake {
+    animation: shell-shake 420ms var(--ease-out-soft);
+  }
+
+  .float-slow {
+    animation: soft-float 5s var(--ease-in-out-soft) infinite;
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 2.4s var(--ease-in-out-soft) infinite;
+  }
+
+  .rise-in {
+    animation: sweep-in 420ms var(--ease-out-soft) backwards;
+  }
+}
+
+/* ==========================================================================
+   Accessibility: one switch turns the whole vocabulary off.
+   The class is applied by the settings store; the media query catches the OS
+   preference even before the app has booted.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 60ms !important;
+}
+
+.reduced-motion .chip__lift {
+  transform: none !important;
+}
