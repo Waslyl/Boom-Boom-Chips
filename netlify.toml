@@ -1,0 +1,44 @@
+# Netlify can host the CLIENT only.
+#
+# The game server is stateful and holds WebSocket connections open, which
+# Netlify Functions and Edge Functions cannot do, so it has to run on a Node
+# host (Render, Railway, Fly.io, a VPS). Point the client at it with the
+# VITE_WS_URL build variable:
+#
+#   VITE_WS_URL = wss://your-server.example.com/ws
+#
+# It is a BUILD-time variable, so changing it needs a redeploy. It must be
+# wss:// (not ws://) or the browser will refuse the connection from HTTPS.
+#
+# On the server side set BBC_SESSION_SECRET and BBC_ALLOWED_ORIGINS to this
+# site's URL, and leave BBC_CLIENT_DIR unset.
+
+[build]
+  command = "npm run build:netlify"
+  publish = "client/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Single-page app: unknown paths serve the shell rather than 404ing.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Hashed assets are immutable; the shell must never be cached.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"

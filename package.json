@@ -22,7 +22,8 @@
     "typecheck": "npm run build",
     "lint": "npm run typecheck",
     "start:e2e": "node scripts/start-e2e.mjs",
-    "test:all": "npm run test && npm run test:e2e"
+    "test:all": "npm run test && npm run test:e2e",
+    "build:netlify": "npm run build:shared && npm run build -w @bbc/client"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -253,6 +253,29 @@ docker run -p 8080:8080 -e BBC_SESSION_SECRET="$(openssl rand -hex 32)" boom-boo
 Behind a reverse proxy, forward the `Upgrade` and `Connection` headers and set
 `X-Forwarded-For` so the per-address limits see real clients.
 
+### Splitting the client onto a static host
+
+Netlify, Vercel and friends can serve the client, but **not** the game server: it
+holds WebSocket connections open and keeps room state in memory, which serverless
+platforms do not do — and their proxy redirects do not forward WebSockets either.
+
+A `netlify.toml` is included for that split. Set one build variable on the static
+host and two on the Node host:
+
+| Where | Variable | Value |
+|---|---|---|
+| static host | `VITE_WS_URL` | `wss://your-server.example.com/ws` |
+| Node host | `BBC_SESSION_SECRET` | `openssl rand -hex 32` |
+| Node host | `BBC_ALLOWED_ORIGINS` | `https://your-site.netlify.app` |
+
+`VITE_WS_URL` is baked in at build time, so changing it needs a redeploy, and it must
+be `wss://` or a browser on an HTTPS page will refuse the connection. Leave
+`BBC_CLIENT_DIR` unset on the Node host so it does not also try to serve a client.
+
+Running both halves from the single container above is simpler and avoids the
+cross-origin setup entirely; the split is only worth it if you already have a domain
+parked on the static host.
+
 Rooms are held in memory: a restart ends live matches, and running more than one
 replica requires sticky sessions (or a shared room store, which this does not have).
 For a game of this size, one process handles a very large number of concurrent rooms.
